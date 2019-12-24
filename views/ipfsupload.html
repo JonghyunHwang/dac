@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>IPFS file upload</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
+    <script src="https://code.jquery.com/jquery-latest.js "></script>
+
+    <script type="text/javascript">
+
+        $(function () {
+
+            $('#uploadBtn').on('click', function () {
+                uploadFile();
+            });
+
+        });
+
+        function uploadFile() {
+            // - contentType : false 로 선언 시 content-type 헤더가 multipart/form-data로 전송되게 함
+            // - processData : false로 선언 시 formData를 string으로 변환하지 않음
+            var form = $('#uploadForm')[0];
+            var formData = new FormData(form);
+
+            $.ajax({
+                url: '/upload/create',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false
+            }).done(function (data) {
+                // callback(data);
+                console.log("https://ipfs.io/ipfs/" + data.hash);
+                alert("성공적으로 전송되었습니다.\n https://ipfs.io/ipfs/" + data.hash)
+
+                $('#result').text("https://ipfs.io/ipfs/" + data.hash);
+                $('#fileInput').value = '';
+
+                $.ajax({
+                    url: '/uploadimage/'+ data.hash,
+                    type: 'GET',
+                    contentType: false,
+                    processData: false
+                }).done(function (data) {
+                    console.log("https://ipfs.io/ipfs/" + data.hash);
+
+                    window.close();
+
+                });
+
+            });
+        }
+
+    </script>
+</head>
+
+<body>
+
+    <section class="section">
+        <div class="container has-text-centered">
+            <img src="/images/undraw.png" width="125px">
+            <h1 class="title is-size-1">File upload</h1>
+
+        </div>
+    </section>
+
+    <form id="uploadForm">
+
+        <section class="section" style="padding-top:0;">
+            <div class="container has-text-centered">
+                <div class="file is-centered is-large has-name is-boxed">
+
+                    <input type="file" name="imgFile" />
+
+                </div>
+                <!-- <a id="uploadBtn" >Upload to IPFS</a> -->
+                <button type="button" id="uploadBtn">파일 업로드하기</button>
+
+                <div id="errorMsg" style="color:red;"></div>
+                <div id="result"></div>
+            </div>
+        </section>
+    </form>
+
+</body>
+
+</html>
